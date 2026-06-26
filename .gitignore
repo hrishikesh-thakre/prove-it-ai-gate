@@ -40,6 +40,11 @@ acceptance_report_*.md
 acceptance_report_*.json
 acceptance_report_*.csv
 
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
 # Temporary
 tmp/
 scratch/

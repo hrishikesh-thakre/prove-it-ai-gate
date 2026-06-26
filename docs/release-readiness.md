@@ -91,3 +91,40 @@ These rates are measured on a curated 6-case dogfood suite. Real-world rates may
 ## Package Structure
 
 Package root is `prove_it_ai_gate/` with entry point `prove_it_ai_gate.cli:main`. Policy files are bundled as package data under `prove_it_ai_gate/policies/`.
+
+## PyPI Release Process
+
+### Local verification
+
+```bash
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
+```
+
+### TestPyPI (recommended before production PyPI)
+
+```bash
+python -m twine upload --repository testpypi dist/*
+pip install --index-url https://test.pypi.org/simple/ prove-it-ai-gate
+```
+
+### Production PyPI
+
+Tag a release commit:
+
+```bash
+git tag v0.3.1
+git push origin v0.3.1
+```
+
+The GitHub Actions `release.yml` workflow builds, checks, and publishes to PyPI via Trusted Publishing on every `v*` tag push.
+
+### Trusted Publishing setup
+
+1. In PyPI project settings, add a Trusted Publisher:
+   - Owner: `hrishikesh-thakre`
+   - Repository: `prove-it-ai-gate`
+   - Workflow: `release.yml`
+2. In GitHub repo settings → Environments, create a `pypi` environment.
+3. Push a `v*` tag to trigger the release workflow.

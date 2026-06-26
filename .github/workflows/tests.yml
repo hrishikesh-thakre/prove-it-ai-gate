@@ -33,6 +33,12 @@ jobs:
     - name: Run tests
       run: python -m pytest tests -v
 
+    - name: Build package
+      run: |
+        pip install build twine
+        python -m build
+        python -m twine check dist/*
+
   dogfood:
     runs-on: ubuntu-latest
     needs: test
