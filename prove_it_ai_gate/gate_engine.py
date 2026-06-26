@@ -159,20 +159,37 @@ def _check_no_repo_modification(repo_path: str, task_type: str, evidence_path: s
         return CheckResult(check_name="no_repo_modification_unless_requested", status="passed")
 
     ev_dir = evidence_path or repo_path
-    status_path = Path(ev_dir) / "workspace" / "git_status_after.txt"
-    if not status_path.is_file():
-        alt_path = Path(repo_path) / "evidence" / "workspace" / "git_status_after.txt"
-        if not alt_path.is_file():
-            return CheckResult(check_name="no_repo_modification_unless_requested", status="passed")
-        status_path = alt_path
+    before_path = Path(ev_dir) / "workspace" / "git_status_before.txt"
+    after_path = Path(ev_dir) / "workspace" / "git_status_after.txt"
 
-    content = status_path.read_text(encoding="utf-8", errors="replace")
-    if content.strip():
+    before = before_path.read_text(encoding="utf-8", errors="replace").strip() if before_path.is_file() else ""
+    after = after_path.read_text(encoding="utf-8", errors="replace").strip() if after_path.is_file() else ""
+
+    if not before and not after:
+        alt_before = Path(repo_path) / "evidence" / "workspace" / "git_status_before.txt"
+        alt_after = Path(repo_path) / "evidence" / "workspace" / "git_status_after.txt"
+        before = alt_before.read_text(encoding="utf-8", errors="replace").strip() if alt_before.is_file() else ""
+        after = alt_after.read_text(encoding="utf-8", errors="replace").strip() if alt_after.is_file() else ""
+
+    if before and after:
+        before_lines = set(before.splitlines())
+        after_lines = set(after.splitlines())
+        new_lines = after_lines - before_lines
+        if new_lines:
+            return CheckResult(
+                check_name="no_repo_modification_unless_requested",
+                status="failed",
+                issues=[Issue("no_repo_modification_unless_requested", Severity.REJECT,
+                              "Target repo was modified during a read-only task")],
+            )
+        return CheckResult(check_name="no_repo_modification_unless_requested", status="passed")
+
+    if after:
         return CheckResult(
             check_name="no_repo_modification_unless_requested",
             status="failed",
             issues=[Issue("no_repo_modification_unless_requested", Severity.REJECT,
-                          "Target repo was modified during a read-only task")],
+                          "Target repo has changes but no before-status for comparison")],
         )
     return CheckResult(check_name="no_repo_modification_unless_requested", status="passed")
 

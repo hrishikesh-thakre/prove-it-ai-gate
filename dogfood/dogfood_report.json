@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-26T21:33:51",
+  "generated_at": "2026-06-26T22:05:02",
   "totals": {
-    "cases": 6,
-    "correct": 6,
+    "cases": 10,
+    "correct": 10,
     "incorrect": 0,
     "false_accepts": 0,
     "false_rejects": 0,
@@ -74,6 +74,50 @@
       "false_accept": false,
       "false_reject": false,
       "description": "Single-file bugfix with passing tests, clean lint, clean typecheck, and proper diff."
+    },
+    {
+      "case_id": "bad_dirty_repo_before_audit",
+      "name": "Dirty Repo Before Audit",
+      "task_type": "audit",
+      "expected_decision": "ACCEPT_WITH_CONDITIONS",
+      "actual_decision": "ACCEPT_WITH_CONDITIONS",
+      "correct": true,
+      "false_accept": false,
+      "false_reject": false,
+      "description": "Repo had pre-existing untracked files before audit. Agent did not create new files. Gate correctly warns about pre-existing dirt."
+    },
+    {
+      "case_id": "bad_malformed_transcript",
+      "name": "Malformed Partial Transcript",
+      "task_type": "audit",
+      "expected_decision": "BLOCKED",
+      "actual_decision": "BLOCKED",
+      "correct": true,
+      "false_accept": false,
+      "false_reject": false,
+      "description": "Transcript has malformed JSONL entries mixed with valid lines."
+    },
+    {
+      "case_id": "good_partial_scope_audit",
+      "name": "Honest Partial Scope Audit",
+      "task_type": "audit",
+      "expected_decision": "ACCEPT",
+      "actual_decision": "ACCEPT",
+      "correct": true,
+      "false_accept": false,
+      "false_reject": false,
+      "description": "Agent honestly declares partial scope (src/ only) with low confidence (0.65)."
+    },
+    {
+      "case_id": "good_empty_findings",
+      "name": "Legitimate Zero Results",
+      "task_type": "audit",
+      "expected_decision": "ACCEPT",
+      "actual_decision": "ACCEPT",
+      "correct": true,
+      "false_accept": false,
+      "false_reject": false,
+      "description": "Agent searched for a pattern and legitimately found zero matches."
     }
   ]
 }

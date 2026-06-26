@@ -66,6 +66,38 @@ DOGFOOD_CASES = [
         "expected_decision": "ACCEPT",
         "description": "Single-file bugfix with passing tests, clean lint, clean typecheck, and proper diff.",
     },
+    {
+        "id": "bad_dirty_repo_before_audit",
+        "name": "Dirty Repo Before Audit",
+        "case_dir": str(EXAMPLES_DIR / "bad_dirty_repo_before_audit"),
+        "task_type": "audit",
+        "expected_decision": "ACCEPT_WITH_CONDITIONS",
+        "description": "Repo had pre-existing untracked files before audit. Agent did not create new files. Gate correctly warns about pre-existing dirt.",
+    },
+    {
+        "id": "bad_malformed_transcript",
+        "name": "Malformed Partial Transcript",
+        "case_dir": str(EXAMPLES_DIR / "bad_malformed_transcript"),
+        "task_type": "audit",
+        "expected_decision": "BLOCKED",
+        "description": "Transcript has malformed JSONL entries mixed with valid lines.",
+    },
+    {
+        "id": "good_partial_scope_audit",
+        "name": "Honest Partial Scope Audit",
+        "case_dir": str(EXAMPLES_DIR / "good_partial_scope_audit"),
+        "task_type": "audit",
+        "expected_decision": "ACCEPT",
+        "description": "Agent honestly declares partial scope (src/ only) with low confidence (0.65).",
+    },
+    {
+        "id": "good_empty_findings",
+        "name": "Legitimate Zero Results",
+        "case_dir": str(EXAMPLES_DIR / "good_empty_findings"),
+        "task_type": "audit",
+        "expected_decision": "ACCEPT",
+        "description": "Agent searched for a pattern and legitimately found zero matches.",
+    },
 ]
 
 

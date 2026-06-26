@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="prove-it-ai-gate",
-    version="0.3.1",
+    version="0.3.2",
     description="A lightweight local CLI acceptance gate for AI-generated engineering work",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

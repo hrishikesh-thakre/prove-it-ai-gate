@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prove-it-ai-gate"
-version = "0.3.1"
+version = "0.3.2"
 description = "A lightweight local CLI acceptance gate for AI-generated engineering work"
 readme = "README.md"
 license = {text = "MIT"}

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.2
+
+- Dogfood suite expanded from 6 to 10 cases
+- Added 4 new dogfood cases: dirty repo, malformed transcript, partial scope, empty findings
+- Added minimal working example (`examples/minimal/`)
+- Added CONTRIBUTING.md, SECURITY.md, GitHub issue templates
+- Automated PyPI release via Trusted Publishing on `v*` tags
+
 ## v0.3.1
 
 - First PyPI release
