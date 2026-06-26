@@ -22,6 +22,7 @@ A lightweight local CLI acceptance gate for AI-generated engineering work. Check
 - `accept`
 
 **Experimental:**
+- `opencode-watch` (Windows Desktop live watcher)
 - `reuse-scan`
 - `capture`
 - `wiki upload`
@@ -66,6 +67,35 @@ ai-gate reuse-scan --brief brief.md --local-wiki ./wiki-exports
 # Capture reusable learnings after acceptance (experimental)
 ai-gate capture --evidence ./evidence --output ./learnings
 ```
+
+## OpenCode Desktop Watcher (Experimental)
+
+Live background guard for OpenCode Desktop on Windows. Polls the OpenCode SQLite
+database for new tool events, detects high-signal violations in near-real-time,
+raises Windows toast alerts, and runs final acceptance at session end.
+
+```bash
+# Start watching an OpenCode session
+ai-gate opencode-watch --project-dir . --task-type audit
+
+# With auto-terminate on hard violations
+ai-gate opencode-watch --project-dir . --task-type audit --auto-terminate
+```
+
+**How it works:**
+- Polls `~/.local/share/opencode/opencode.db` every 2s for new tool events
+- Detects secret file reads, blocker commands (`rm -rf /`, `DROP TABLE`, `curl | sh`),
+  and warning-tier commands (`chmod 777`, `git push --force`)
+- Persists evidence to `evidence/transcript.jsonl`, `live_watch_report.jsonl`,
+  `workspace/git_status_after.txt`, and `closeout.md`
+- Raises Windows toast alerts on violations
+- Optionally terminates OpenCode on hard violations (`--auto-terminate`)
+- Runs `ai-gate accept` at session end (Ctrl+C or natural session close)
+
+**Limitations:**
+- SQLite-based — near-real-time, not pre-tool-call blocking
+- Windows Desktop only; CLI/TUI plugin path is separate experimental track
+- `--auto-terminate` is opt-in; only kills OpenCode-tagged processes
 
 ## Decision States
 
