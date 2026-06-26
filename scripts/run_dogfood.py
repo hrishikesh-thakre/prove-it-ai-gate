@@ -17,6 +17,15 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES_DIR = REPO_ROOT / "examples" / "dogfood"
 FAKE_PROJECT = str(REPO_ROOT / "examples" / "fake_project")
 
+def _ensure_git(repo_path: str) -> None:
+    git_dir = Path(repo_path) / ".git"
+    if not git_dir.is_dir():
+        subprocess.run(["git", "init", repo_path], capture_output=True, timeout=10)
+        subprocess.run(["git", "-C", repo_path, "add", "-A"], capture_output=True, timeout=10)
+        subprocess.run(["git", "-C", repo_path, "commit", "-m", "init", "--allow-empty"],
+                       capture_output=True, timeout=10)
+
+
 DOGFOOD_CASES = [
     {
         "id": "bad_repo_pollution",
@@ -142,6 +151,8 @@ def main() -> int:
     if len(sys.argv) > 2 and sys.argv[1] == "--output":
         output_dir = Path(sys.argv[2])
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    _ensure_git(FAKE_PROJECT)
 
     results: list[dict] = []
     correct = 0

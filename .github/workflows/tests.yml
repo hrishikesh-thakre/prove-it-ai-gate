@@ -57,4 +57,8 @@ jobs:
         pip install pytest
 
     - name: Run dogfood
-      run: python scripts/run_dogfood.py
+      run: |
+        git init examples/fake_project
+        git -C examples/fake_project add -A
+        git -C examples/fake_project commit -m "init" --allow-empty
+        python scripts/run_dogfood.py
