@@ -1,0 +1,11 @@
+{
+  "todos": [
+    {"file": "src/main.py", "line": 5, "text": "TODO: implement parsing"},
+    {"file": "src/utils.py", "line": 12, "text": "TODO: add validation"}
+  ],
+  "test_coverage": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0
+  }
+}

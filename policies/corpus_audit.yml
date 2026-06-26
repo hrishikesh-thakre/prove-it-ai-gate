@@ -1,0 +1,50 @@
+name: corpus_audit
+description: |
+  Policy for full-corpus scan and audit tasks.
+  The agent must produce a complete inventory with extraction artifacts
+  and must not claim completeness from heuristic methods alone.
+applies_to:
+  - corpus_audit
+  - inventory
+  - extraction
+  - data_audit
+  - compliance_scan
+
+required_checks:
+  - transcript_truncation_check
+  - evidence_folder_schema_check
+  - deterministic_evidence_artifact
+  - workspace_hygiene_check
+  - confidence_claim_check
+  - scope_completeness_check
+  - heuristic_extraction_check
+  - closeout_transcript_crosscheck
+
+required_evidence:
+  - full_inventory
+  - extraction_script_or_command
+  - extracted_data_artifact
+  - scope_statement
+  - heuristic_limitations
+  - audit_guard_result
+
+reject_if:
+  - heuristic_extraction_claimed_as_complete
+  - missing_scope_statement
+  - target_repo_modified_without_permission
+  - policy_violation
+  - unsupported_complete_claim
+
+block_if:
+  - unresolved_truncated_output
+  - missing_transcript
+  - missing_inventory
+  - missing_extraction_artifact
+  - missing_scope_statement
+  - malformed_transcript
+
+confidence_thresholds:
+  high: 0.85
+  heuristic_cap: 0.70
+
+risk_tier: medium

@@ -1,0 +1,51 @@
+name: code_change
+description: |
+  Policy for code modification tasks.
+  The agent must produce a clean diff, tests, lint output, and typecheck results.
+applies_to:
+  - code_change
+  - bugfix
+  - feature
+  - refactor
+  - dependency_update
+
+required_checks:
+  - transcript_truncation_check
+  - evidence_folder_schema_check
+  - workspace_hygiene_check
+  - changed_files_summary_check
+  - confidence_claim_check
+  - scope_completeness_check
+  - closeout_transcript_crosscheck
+
+required_evidence:
+  - changed_files_list
+  - git_diff
+  - test_output
+  - lint_output
+  - typecheck_output
+  - validation_summary
+  - risk_classification
+  - unresolved_risks
+
+reject_if:
+  - failed_tests
+  - failed_lint
+  - failed_typecheck
+  - target_repo_modified_without_permission
+  - policy_violation
+  - closeout_claims_no_changes_but_git_shows_changes
+
+block_if:
+  - unresolved_truncated_output
+  - missing_transcript
+  - missing_changed_files_list
+  - missing_validation_output
+  - missing_git_diff
+  - malformed_transcript
+
+confidence_thresholds:
+  high: 0.90
+  heuristic_cap: 0.75
+
+risk_tier: medium

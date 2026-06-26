@@ -1,0 +1,9 @@
+{
+  "files": [
+    {"path": "src/main.py", "size_bytes": 84},
+    {"path": "src/utils.py", "size_bytes": 256},
+    {"path": "tests/test_main.py", "size_bytes": 512}
+  ],
+  "total_files": 3,
+  "selection_rule": "All .py files under src/ and tests/"
+}

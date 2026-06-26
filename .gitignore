@@ -1,0 +1,45 @@
+# Environment
+.env
+.env.gate
+
+# Evidence folders (can be large)
+evidence/
+*.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+.pytest_cache/
+*.coverage
+htmlcov/
+
+# Generated acceptance reports
+acceptance_report_*.md
+acceptance_report_*.json
+acceptance_report_*.csv
+
+# Temporary
+tmp/
+scratch/

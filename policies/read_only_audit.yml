@@ -1,0 +1,49 @@
+name: read_only_audit
+description: |
+  Policy for read-only audit, review, listing, evaluation, and signoff tasks.
+  The agent must not modify the target repository.
+applies_to:
+  - audit
+  - review
+  - listing
+  - evaluation
+  - signoff
+
+required_checks:
+  - transcript_truncation_check
+  - evidence_folder_schema_check
+  - deterministic_evidence_artifact
+  - workspace_hygiene_check
+  - no_repo_modification_unless_requested
+  - confidence_claim_check
+  - scope_completeness_check
+  - closeout_transcript_crosscheck
+
+required_evidence:
+  - transcript
+  - scoped_corpus_definition
+  - inventory_or_partial_sample_warning
+  - deterministic_extraction_artifact
+  - workspace_status
+  - audit_guard_result
+  - confidence_limits
+
+reject_if:
+  - target_repo_modified_without_permission
+  - failed_validation
+  - policy_violation
+  - unsupported_complete_claim
+  - final_confidence_above_limit_without_evidence
+
+block_if:
+  - unresolved_truncated_output
+  - missing_transcript
+  - missing_required_evidence
+  - invalid_evidence_artifact
+  - malformed_transcript
+
+confidence_thresholds:
+  high: 0.90
+  heuristic_cap: 0.75
+
+risk_tier: medium
