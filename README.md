@@ -3,6 +3,7 @@
 **Don't trust agent output. Accept evidence.**
 
 [![CI](https://github.com/hrishikesh-thakre/prove-it-ai-gate/actions/workflows/tests.yml/badge.svg)](https://github.com/hrishikesh-thakre/prove-it-ai-gate/actions/workflows/tests.yml)
+[![PyPI](https://img.shields.io/pypi/v/prove-it-ai-gate)](https://pypi.org/project/prove-it-ai-gate/)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
