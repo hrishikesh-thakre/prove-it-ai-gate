@@ -30,10 +30,8 @@ Use the stable core for local dogfooding. Treat experimental features as evolvin
 
 ## Installation
 
-From GitHub:
-
 ```bash
-pip install git+https://github.com/hrishikesh-thakre/prove-it-ai-gate.git
+pip install prove-it-ai-gate
 ```
 
 Or from source:
