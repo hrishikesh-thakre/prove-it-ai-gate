@@ -32,6 +32,8 @@ def tmp_repo():
         src_dir.mkdir()
         (src_dir / "main.py").write_text("print('hello')\n")
         os.system(f"git init {repo}")
+        os.system(f'git -C {repo} config user.email "ci@example.com"')
+        os.system(f'git -C {repo} config user.name "CI"')
         os.system(f"git -C {repo} add -A")
         os.system(f'git -C {repo} commit -m "init" --allow-empty')
         yield str(repo)

@@ -58,6 +58,8 @@ jobs:
 
     - name: Run dogfood
       run: |
+        git config --global user.email "ci@example.com"
+        git config --global user.name "CI"
         git init examples/fake_project
         git -C examples/fake_project add -A
         git -C examples/fake_project commit -m "init" --allow-empty
