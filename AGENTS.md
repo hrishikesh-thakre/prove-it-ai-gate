@@ -1,6 +1,6 @@
 # prove-it-ai-gate
 
-This project builds and uses `prove-it-ai-gate`, a local CLI acceptance gate for AI-generated engineering work.
+This project builds `prove-it-ai-gate`, a local CLI acceptance gate for AI-generated engineering work.
 
 ## Build and Test
 
@@ -22,18 +22,5 @@ python scripts/run_dogfood.py
 
 - Python 3.9+, pyyaml only dependency
 - `pytest` for testing; no unittest
-- All imports use `prove_it_ai_gate.xxx` (package renamed from `src`)
+- All imports use `prove_it_ai_gate.xxx`
 - Keep public repo generic — no real project names, paths, or transcripts
-
-## Evidence discipline
-
-After completing any task in this repo, run the gate using bash:
-
-```bash
-python -m prove_it_ai_gate.cli accept --repo . --evidence ./evidence --transcript transcript.jsonl --task-type audit
-```
-
-For code changes:
-```bash
-python -m prove_it_ai_gate.cli accept --repo . --evidence ./evidence --transcript transcript.jsonl --task-type code_change
-```
