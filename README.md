@@ -105,7 +105,7 @@ See `dogfood/dogfood_report.md` for results and `examples/dogfood/` for test cas
 
 ## Policy Packs
 
-Three built-in policies in `src/policies/`:
+Three built-in policies in `prove_it_ai_gate/policies/`:
 
 | Policy | Use Case |
 |---|---|

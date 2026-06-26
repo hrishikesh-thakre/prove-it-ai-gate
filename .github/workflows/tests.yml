@@ -28,7 +28,7 @@ jobs:
         pip install pytest
 
     - name: Compile check
-      run: python -m compileall -q src tests
+      run: python -m compileall -q prove_it_ai_gate tests
 
     - name: Run tests
       run: python -m pytest tests -v

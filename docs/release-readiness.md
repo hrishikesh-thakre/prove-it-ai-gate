@@ -90,6 +90,4 @@ These rates are measured on a curated 6-case dogfood suite. Real-world rates may
 
 ## Package Structure
 
-Package root is `src/` with entry point `src.cli:main`. Policy files are bundled as package data under `src/policies/`.
-
-The current structure uses `src/` layout which requires `pip install .` or `pip install -e .` to work. This is acceptable for early beta. A future cleanup may move to `prove_it_ai_gate/` package name but this requires careful migration and is deferred.
+Package root is `prove_it_ai_gate/` with entry point `prove_it_ai_gate.cli:main`. Policy files are bundled as package data under `prove_it_ai_gate/policies/`.
