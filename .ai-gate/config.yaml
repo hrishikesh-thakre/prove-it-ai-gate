@@ -1,23 +1,9 @@
-# prove-it-ai-gate project configuration
-# Copy this to your project root and customize.
+# prove-it-ai-gate project configuration — deployed for this project
 
-# Path to evidence folder (default: ./evidence)
 evidence: ./evidence
-
-# Path to transcript file (default: ./transcript.jsonl)
 transcript: ./transcript.jsonl
-
-# Path to learnings output directory (default: ./learnings)
 learnings: ./learnings
-
-# Path to local wiki exports for Reuse Scout (optional)
-wiki_path: ""
-
-# Default task type for ai-gate accept
+wiki_path: D:\bookstack_reuse\engineering-reuse-wiki\exports
 task_type: audit
-
-# Default policy pack (leave empty to auto-resolve by task type)
 policy: ""
-
-# Scratch directory for temporary agent files
-scratch_dir: ""
+scratch_dir: ./scratch
