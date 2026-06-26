@@ -2,7 +2,7 @@ include README.md
 include LICENSE
 include pyproject.toml
 include setup.py
-recursive-include src/policies *.yml
+recursive-include prove_it_ai_gate/policies *.yml
 recursive-include docs *.md
 recursive-include examples *
 prune tests

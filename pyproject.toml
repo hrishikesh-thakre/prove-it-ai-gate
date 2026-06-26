@@ -7,7 +7,7 @@ name = "prove-it-ai-gate"
 version = "0.3.2"
 description = "A lightweight local CLI acceptance gate for AI-generated engineering work"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.9"
 authors = [
     {name = "Hrishikesh Thakre"}
@@ -24,7 +24,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",

@@ -8,14 +8,10 @@ setup(
     long_description_content_type="text/markdown",
     author="Hrishikesh Thakre",
     url="https://github.com/hrishikesh-thakre/prove-it-ai-gate",
-    license="MIT",
     packages=find_packages(include=["prove_it_ai_gate", "prove_it_ai_gate.*"]),
     package_data={
         "prove_it_ai_gate": ["policies/*.yml"],
     },
-    install_requires=[
-        "pyyaml>=6.0",
-    ],
     entry_points={
         "console_scripts": [
             "ai-gate=prove_it_ai_gate.cli:main",
@@ -26,7 +22,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
