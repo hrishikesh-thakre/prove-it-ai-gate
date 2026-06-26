@@ -19,7 +19,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.gate_engine import Decision, run_acceptance
+from prove_it_ai_gate.gate_engine import Decision, run_acceptance
 
 
 def test_fa1_truncated_output_no_replacement(policies_dir, tmp_repo, tmp_evidence):

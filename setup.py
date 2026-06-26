@@ -2,23 +2,23 @@ from setuptools import setup, find_packages
 
 setup(
     name="prove-it-ai-gate",
-    version="0.2.0",
+    version="0.3.1",
     description="A lightweight local CLI acceptance gate for AI-generated engineering work",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Hrishikesh Thakre",
     url="https://github.com/hrishikesh-thakre/prove-it-ai-gate",
     license="MIT",
-    packages=find_packages(include=["src", "src.*"]),
+    packages=find_packages(include=["prove_it_ai_gate", "prove_it_ai_gate.*"]),
     package_data={
-        "src": ["policies/*.yml"],
+        "prove_it_ai_gate": ["policies/*.yml"],
     },
     install_requires=[
         "pyyaml>=6.0",
     ],
     entry_points={
         "console_scripts": [
-            "ai-gate=src.cli:main",
+            "ai-gate=prove_it_ai_gate.cli:main",
         ],
     },
     python_requires=">=3.9",

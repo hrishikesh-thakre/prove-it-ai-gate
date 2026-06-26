@@ -3,7 +3,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from src.confidence_checker import check_confidence_claims
+from prove_it_ai_gate.confidence_checker import check_confidence_claims
 
 
 class TestConfidenceChecker:

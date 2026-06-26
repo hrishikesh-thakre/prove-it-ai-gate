@@ -3,14 +3,14 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from src.gate_engine import Decision
-from src.types import CheckResult, Issue, Severity
-from src.knowledge_capture import generate_capture, write_capture, capture_from_json_report
+from prove_it_ai_gate.gate_engine import Decision
+from prove_it_ai_gate.types import CheckResult, Issue, Severity
+from prove_it_ai_gate.knowledge_capture import generate_capture, write_capture, capture_from_json_report
 
 
 class TestKnowledgeCapture:
     def test_generate_capture_from_accepted_report(self, tmp_evidence):
-        from src.gate_engine import AcceptanceReport
+        from prove_it_ai_gate.gate_engine import AcceptanceReport
 
         report = AcceptanceReport(
             decision=Decision.ACCEPT,
@@ -38,7 +38,7 @@ class TestKnowledgeCapture:
         assert "Reusable Insight" in content
 
     def test_generate_capture_from_rejected_report(self, tmp_evidence):
-        from src.gate_engine import AcceptanceReport
+        from prove_it_ai_gate.gate_engine import AcceptanceReport
 
         report = AcceptanceReport(
             decision=Decision.REJECT,
@@ -65,7 +65,7 @@ class TestKnowledgeCapture:
         assert "failure" in content
 
     def test_write_capture_to_file(self, tmp_evidence):
-        from src.gate_engine import AcceptanceReport
+        from prove_it_ai_gate.gate_engine import AcceptanceReport
 
         report = AcceptanceReport(
             decision=Decision.ACCEPT_WITH_CONDITIONS,

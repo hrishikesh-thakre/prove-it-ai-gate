@@ -15,7 +15,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.gate_engine import Decision, run_acceptance
+from prove_it_ai_gate.gate_engine import Decision, run_acceptance
 
 
 def test_fr1_legitimate_truncated_discussion(policies_dir, tmp_repo, tmp_evidence):

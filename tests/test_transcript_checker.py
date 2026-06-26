@@ -4,7 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.transcript_checker import check_transcript_truncation, parse_transcript
+from prove_it_ai_gate.transcript_checker import check_transcript_truncation, parse_transcript
 
 
 class TestTranscriptParser:

@@ -5,7 +5,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from src.evidence_retention import (
+from prove_it_ai_gate.evidence_retention import (
     find_evidence_folders,
     cleanup_evidence,
     archive_evidence,

@@ -75,7 +75,7 @@ def run_ai_gate(case_dir: str, task_type: str) -> dict:
     output = case_dir
 
     cmd = [
-        sys.executable, "-m", "src.cli", "accept",
+        sys.executable, "-m", "prove_it_ai_gate.cli", "accept",
         "--repo", FAKE_PROJECT,
         "--evidence", evidence,
         "--transcript", transcript,

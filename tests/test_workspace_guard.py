@@ -4,7 +4,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from src.workspace_guard import check_workspace_hygiene, parse_status_entries, run_git_status
+from prove_it_ai_gate.workspace_guard import check_workspace_hygiene, parse_status_entries, run_git_status
 
 
 class TestGitStatusParser:

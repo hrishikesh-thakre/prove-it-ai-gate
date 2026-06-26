@@ -1,6 +1,6 @@
 # Release Readiness
 
-`prove-it-ai-gate` v0.3.0 — early beta assessment.
+`prove-it-ai-gate` v0.3.1 — early beta assessment.
 
 ## Supported Commands
 

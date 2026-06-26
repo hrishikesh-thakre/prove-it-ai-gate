@@ -15,7 +15,7 @@ def project_root():
 
 @pytest.fixture
 def policies_dir(project_root):
-    return project_root / "src" / "policies"
+    return project_root / "prove_it_ai_gate" / "policies"
 
 
 @pytest.fixture

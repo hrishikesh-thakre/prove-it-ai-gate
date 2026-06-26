@@ -4,7 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.evidence_checker import check_evidence_folder, inventory_evidence_files
+from prove_it_ai_gate.evidence_checker import check_evidence_folder, inventory_evidence_files
 
 
 class TestEvidenceFolder:

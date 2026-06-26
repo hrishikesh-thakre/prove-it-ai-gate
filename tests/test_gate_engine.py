@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.gate_engine import (
+from prove_it_ai_gate.gate_engine import (
     Decision,
     run_acceptance,
     resolve_policy,

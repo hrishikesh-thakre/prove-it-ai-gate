@@ -17,7 +17,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from src.gate_engine import Decision, run_acceptance
+from prove_it_ai_gate.gate_engine import Decision, run_acceptance
 
 
 def build_adversarial_evidence(evidence_dir: Path, closeout_content: str, inventory_data: dict | None = None,
