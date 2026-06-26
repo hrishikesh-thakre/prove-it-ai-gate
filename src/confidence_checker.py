@@ -57,13 +57,40 @@ def _check_heuristic_in_transcript(transcript_path: str) -> bool:
     if not path.is_file():
         return False
 
-    content = path.read_text(encoding="utf-8", errors="replace").lower()
+    raw = path.read_text(encoding="utf-8", errors="replace").lower()
+
+    import json as _json
+    tool_texts: list[str] = []
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = _json.loads(line)
+        except _json.JSONDecodeError:
+            continue
+        if event.get("type") in ("tool_result", "tool_call") or event.get("role") == "tool":
+            for field in ("stdout", "stderr", "content", "output", "command"):
+                val = event.get(field)
+                if isinstance(val, str):
+                    tool_texts.append(val)
+
+    combined = " ".join(tool_texts).lower()
     heuristic_markers = [
         "grep ", "rg ", "select-string", "findstr",
-        "filename match", "keyword match", "regex search",
-        "heuristic", "manually selected", "manually grouped",
+        "filename match", "keyword match", "keyword filter",
+        "regex search", "regex match",
+        "heuristic extraction", "heuristic method", "heuristic search",
+        "manually selected", "manually grouped",
     ]
-    return any(marker in content for marker in heuristic_markers)
+    if any(marker in combined for marker in heuristic_markers):
+        return True
+
+    if ("heuristic" in combined and
+        any(ctx in combined for ctx in ["extraction", "method", "search", "matching", "filter"])):
+        return True
+
+    return False
 
 
 def check_confidence_claims(evidence_path: str, transcript_path: str = "",

@@ -69,6 +69,12 @@ def evaluate_checks(
     from .scope_completeness_checker import check_scope_completeness
     from .heuristic_checker import check_heuristic_extraction
     from .transcript_crosscheck import check_closeout_vs_transcript
+    from .evidence_integrity import (
+        check_inventory_vs_transcript,
+        check_closeout_vs_validation,
+        check_evidence_depth,
+        check_git_status_authenticity,
+    )
 
     thresholds = policy.get("confidence_thresholds", {})
     high_threshold = float(thresholds.get("high", 0.90))
@@ -88,6 +94,10 @@ def evaluate_checks(
         "heuristic_extraction_check": lambda: check_heuristic_extraction(evidence_path, transcript_path),
         "changed_files_summary_check": lambda: _check_changed_files_summary(evidence_path),
         "closeout_transcript_crosscheck": lambda: check_closeout_vs_transcript(evidence_path, transcript_path),
+        "evidence_inventory_integrity": lambda: check_inventory_vs_transcript(evidence_path, transcript_path),
+        "evidence_validation_integrity": lambda: check_closeout_vs_validation(evidence_path, transcript_path),
+        "evidence_depth": lambda: check_evidence_depth(evidence_path),
+        "git_status_authenticity": lambda: check_git_status_authenticity(evidence_path, transcript_path),
     }
 
     for check_name in required_checks:

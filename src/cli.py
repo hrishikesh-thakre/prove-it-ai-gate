@@ -14,9 +14,11 @@ from .confidence_checker import check_confidence_claims
 from .scope_completeness_checker import check_scope_completeness
 from .heuristic_checker import check_heuristic_extraction
 from .acceptance_report import write_report, write_csv_report
+from .knowledge_capture import write_capture, capture_from_json_report, upload_to_wiki
+from .evidence_retention import cleanup_evidence, archive_evidence, summary_report
 
 
-DEFAULT_POLICY_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "policies")
+DEFAULT_POLICY_DIR = os.path.join(os.path.dirname(__file__), "policies")
 
 
 def _env_or_arg(env_name: str, arg_value: str | None) -> str:
@@ -110,6 +112,96 @@ def cmd_accept(args: argparse.Namespace) -> int:
         return 3
 
 
+def cmd_capture(args: argparse.Namespace) -> int:
+    if args.report_json:
+        path = capture_from_json_report(args.report_json, args.evidence or ".", args.output or ".")
+        print(f"Knowledge capture written from report: {path}")
+        if args.upload:
+            return _do_upload(path, args)
+        return 0
+
+    policy_dir = args.policy_dir or DEFAULT_POLICY_DIR
+    report = run_acceptance(
+        repo_path=args.repo,
+        evidence_path=args.evidence,
+        transcript_path=args.transcript,
+        policy_dir=policy_dir,
+        policy_name=args.policy,
+        task_type=args.task_type,
+        scratch_dir=getattr(args, "scratch_dir", ""),
+    )
+
+    capture_path = write_capture(report, args.evidence, args.output or ".")
+    print(f"Decision: {report.decision.value}")
+    print(f"Knowledge capture written to: {capture_path}")
+    if args.upload:
+        return _do_upload(str(capture_path), args)
+    return 0
+
+
+def _do_upload(capture_path: str, args: argparse.Namespace) -> int:
+    wiki_url = _env_or_arg("AI_GATE_WIKI_URL", args.wiki_url)
+    token_id = _env_or_arg("AI_GATE_WIKI_TOKEN_ID", args.wiki_token_id)
+    token_secret = _env_or_arg("AI_GATE_WIKI_TOKEN_SECRET", args.wiki_token_secret)
+
+    if not wiki_url or not token_id or not token_secret:
+        print("Upload requires wiki API credentials.")
+        return 1
+
+    try:
+        result = upload_to_wiki(capture_path, wiki_url, token_id, token_secret)
+        print(f"Uploaded to wiki: {result['title']} ({result['status']})")
+        return 0
+    except Exception as exc:
+        print(f"Upload failed: {exc}")
+        return 1
+
+
+def cmd_cleanup(args: argparse.Namespace) -> int:
+    dry_run = not getattr(args, "apply", False)
+    result = cleanup_evidence(
+        root=args.evidence_root,
+        older_than=args.older_than,
+        keep_failures=not getattr(args, "clean_all", False),
+        dry_run=dry_run,
+    )
+
+    print(f"Evidence cleanup ({'DRY RUN' if dry_run else 'APPLYING'}):")
+    print(f"  Root: {result['root']}")
+    print(f"  Older than: {result['older_than_days']} days")
+    print(f"  Folders found: {result['folders_found']}")
+    print(f"  To remove: {result['folders_removed']}")
+    print(f"  Kept (failures): {result['folders_kept']}")
+
+    if result["removed"]:
+        print("\n  Would remove:" if dry_run else "\n  Removed:")
+        for item in result["removed"]:
+            print(f"    - {item['path']}")
+
+    if dry_run:
+        print("\n  Use --apply to execute cleanup.")
+    return 0
+
+
+def cmd_archive(args: argparse.Namespace) -> int:
+    path = archive_evidence(args.evidence, args.output or ".", name=args.name)
+    print(f"Evidence archived to: {path}")
+    return 0
+
+
+def cmd_evidence_summary(args: argparse.Namespace) -> int:
+    result = summary_report(args.evidence_root)
+    if "error" in result:
+        print(result["error"])
+        return 1
+    print(f"Evidence summary for: {result['root']}")
+    print(f"  Total folders: {result['total_folders']}")
+    print(f"  Failure/blocked folders: {result['failure_folders']}")
+    print(f"  Clean folders: {result['clean_folders']}")
+    print(f"  Total size: {result['total_size_mb']} MB")
+    return 0
+
+
 def cmd_reuse_scan(args: argparse.Namespace) -> int:
     from .reuse_scout import scan_reuse_wiki, format_reuse_report
 
@@ -158,7 +250,7 @@ def cmd_reuse_scan(args: argparse.Namespace) -> int:
 
 
 def cmd_reuse_scan_local(args: argparse.Namespace) -> int:
-    from .reuse_scout import format_reuse_report, _word_set, _score_match, _classify_reuse, _parse_front_matter, _clean_list
+    from .reuse_scout import format_reuse_report, _word_set, _score_match, _classify_reuse, _parse_front_matter, _clean_list, _jaccard
     from datetime import datetime
 
     wiki_path = Path(args.local_wiki)
@@ -195,16 +287,11 @@ def cmd_reuse_scan_local(args: argparse.Namespace) -> int:
             }
 
             body = content.split("---", 2)[-1] if content.count("---") >= 2 else content
-            body_words = _word_set(body)
-            body_overlap = 0.0
-            if brief_words and body_words:
-                from .reuse_scout import _jaccard
-                body_overlap = _jaccard(brief_words, body_words)
 
             enriched = {
                 **page,
-                "relevance_score": round(_score_match(brief_words, page), 3),
-                "body_overlap": round(body_overlap, 3),
+                "relevance_score": _score_match(brief_words, page, brief_text, body),
+                "body_overlap": round(_jaccard(brief_words, _word_set(body)) if brief_words and _word_set(body) else 0.0, 3),
                 "reuse_classification": _classify_reuse(page),
                 "needs_human_review": page["reuse_status"] == "needs_human_review" or page["status"] == "draft",
             }
@@ -288,6 +375,34 @@ def main() -> int:
     p_accept.add_argument("--output", help="Output directory for reports")
     p_accept.add_argument("--scratch-dir", help="Allowed scratch directory for temporary files")
 
+    p_capture = subparsers.add_parser("capture", help="Capture reusable learning from acceptance report")
+    p_capture.add_argument("--repo", help="Path to target repository")
+    p_capture.add_argument("--evidence", help="Path to evidence folder")
+    p_capture.add_argument("--transcript", help="Path to transcript JSONL file")
+    p_capture.add_argument("--report-json", help="Path to existing acceptance report JSON (skips re-running gate)")
+    p_capture.add_argument("--policy", help="Policy pack name")
+    p_capture.add_argument("--policy-dir", help="Directory containing policy YAML files")
+    p_capture.add_argument("--task-type", help="Task type")
+    p_capture.add_argument("--output", help="Output directory for capture")
+    p_capture.add_argument("--upload", action="store_true", help="Upload capture to wiki API")
+    p_capture.add_argument("--wiki-url", help="Wiki API URL")
+    p_capture.add_argument("--wiki-token-id", help="Wiki API token ID")
+    p_capture.add_argument("--wiki-token-secret", help="Wiki API token secret")
+
+    p_cleanup = subparsers.add_parser("cleanup", help="Clean up old evidence folders")
+    p_cleanup.add_argument("--evidence-root", required=True, help="Root directory containing evidence folders")
+    p_cleanup.add_argument("--older-than", default="30d", help="Remove evidence older than N days (e.g. 30d, 7d, 1w)")
+    p_cleanup.add_argument("--clean-all", action="store_true", help="Remove all old evidence including failures")
+    p_cleanup.add_argument("--apply", action="store_true", help="Execute cleanup (default is dry-run)")
+
+    p_archive = subparsers.add_parser("archive", help="Archive an evidence folder")
+    p_archive.add_argument("--evidence", required=True, help="Path to evidence folder to archive")
+    p_archive.add_argument("--output", help="Output directory for archive")
+    p_archive.add_argument("--name", help="Custom name for the archive")
+
+    p_ev_summary = subparsers.add_parser("evidence-summary", help="Summary of evidence folder storage")
+    p_ev_summary.add_argument("--evidence-root", required=True, help="Root directory containing evidence folders")
+
     p_reuse = subparsers.add_parser("reuse-scan", help="Scan reuse wiki for matching assets")
     p_reuse.add_argument("--brief", required=True, help="Path to project brief markdown file")
     p_reuse.add_argument("--wiki-url", help="Wiki API URL (or set AI_GATE_WIKI_URL env)")
@@ -309,6 +424,14 @@ def main() -> int:
         return cmd_evidence_check(args)
     elif args.command == "accept":
         return cmd_accept(args)
+    elif args.command == "capture":
+        return cmd_capture(args)
+    elif args.command == "cleanup":
+        return cmd_cleanup(args)
+    elif args.command == "archive":
+        return cmd_archive(args)
+    elif args.command == "evidence-summary":
+        return cmd_evidence_summary(args)
     elif args.command == "reuse-scan":
         if getattr(args, "local_wiki", None):
             return cmd_reuse_scan_local(args)

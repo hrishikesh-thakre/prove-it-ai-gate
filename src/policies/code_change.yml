@@ -17,6 +17,10 @@ required_checks:
   - confidence_claim_check
   - scope_completeness_check
   - closeout_transcript_crosscheck
+  - evidence_inventory_integrity
+  - evidence_validation_integrity
+  - evidence_depth
+  - git_status_authenticity
 
 required_evidence:
   - changed_files_list

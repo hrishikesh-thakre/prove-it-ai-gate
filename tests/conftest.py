@@ -15,7 +15,7 @@ def project_root():
 
 @pytest.fixture
 def policies_dir(project_root):
-    return project_root / "policies"
+    return project_root / "src" / "policies"
 
 
 @pytest.fixture

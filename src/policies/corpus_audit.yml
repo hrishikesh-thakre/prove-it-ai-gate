@@ -19,6 +19,10 @@ required_checks:
   - scope_completeness_check
   - heuristic_extraction_check
   - closeout_transcript_crosscheck
+  - evidence_inventory_integrity
+  - evidence_validation_integrity
+  - evidence_depth
+  - git_status_authenticity
 
 required_evidence:
   - full_inventory

@@ -129,7 +129,39 @@ def _clean_list(value) -> list[str]:
     return [value.strip().strip("'\"")]
 
 
-def _score_match(brief_words: set[str], page: dict) -> float:
+def _tfidf_score(brief_text: str, page_body: str) -> float:
+    if not brief_text or not page_body:
+        return 0.0
+
+    brief_words = _word_set(brief_text)
+    body_words = _word_set(page_body)
+
+    if not brief_words or not body_words:
+        return 0.0
+
+    term_freq: dict[str, float] = {}
+    for word in body_words:
+        term_freq[word] = term_freq.get(word, 0) + 1
+
+    max_freq = max(term_freq.values()) if term_freq else 1
+    tf = {w: f / max_freq for w, f in term_freq.items()}
+
+    score = 0.0
+    matched = 0
+    for word in brief_words:
+        if word in tf:
+            score += tf[word]
+            matched += 1
+
+    if matched == 0:
+        return 0.0
+
+    score = score / len(brief_words)
+    coverage = matched / len(brief_words)
+    return min(1.0, (score * 0.6 + coverage * 0.4))
+
+
+def _score_match(brief_words: set[str], page: dict, brief_text: str = "", page_body: str = "") -> float:
     title = page.get("name", "")
     title_words = _word_set(title)
     tags = _clean_list(page.get("tags", ""))
@@ -161,7 +193,13 @@ def _score_match(brief_words: set[str], page: dict) -> float:
     elif reuse_status == "do_not_reuse":
         bonus -= 0.20
 
-    return min(1.0, jaccard_score + bonus)
+    keyword_score = min(1.0, jaccard_score + bonus)
+
+    if brief_text and page_body:
+        semantic = _tfidf_score(brief_text, page_body)
+        return round(keyword_score * 0.4 + semantic * 0.6, 3)
+
+    return round(keyword_score, 3)
 
 
 def _classify_reuse(page: dict) -> str:
@@ -229,12 +267,12 @@ def scan_reuse_wiki(
                 "tags": _clean_list(fm.get("tags", "")),
                 "related_projects": _clean_list(fm.get("related_projects", "")),
                 "last_validated": fm.get("last_validated", ""),
-                "relevance_score": round(_score_match(brief_words, {
+                "relevance_score": _score_match(brief_words, {
                     "name": page.get("name", ""),
                     "maturity": fm.get("maturity", ""),
                     "reuse_status": fm.get("reuse_status", ""),
                     "tags": fm.get("tags", ""),
-                }), 3),
+                }, brief_text, body),
                 "body_overlap": round(body_overlap, 3),
                 "reuse_classification": _classify_reuse({
                     "maturity": fm.get("maturity", ""),
