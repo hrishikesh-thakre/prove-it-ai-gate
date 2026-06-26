@@ -22,10 +22,16 @@ def get_latest_session(project_dir: str) -> dict | None:
         return None
     db = sqlite3.connect(OPENDCODE_DB)
     db.row_factory = sqlite3.Row
-    candidate_dirs = [
-        project_dir,
-        project_dir.replace("\\", "/"),
-    ]
+    candidate_dirs = []
+    p = project_dir.replace("\\", "/")
+    candidate_dirs.append(p)
+    parent = os.path.dirname(p)
+    if parent and parent != p:
+        candidate_dirs.append(parent)
+    grandparent = os.path.dirname(parent)
+    if grandparent and grandparent != parent:
+        candidate_dirs.append(grandparent)
+
     row = None
     for cd in set(candidate_dirs):
         row = db.execute(
@@ -60,47 +66,36 @@ def extract_transcript(session_id: str, output_path: str) -> int:
 
 
 def extract_tool_result_transcript(session_id: str, output_path: str) -> int:
-    """Extract a transcript suitable for the gate: only tool_call and tool_result events."""
+    """Extract tool events from OpenCode session as gate-compatible transcript."""
     if not os.path.isfile(OPENDCODE_DB):
         return 0
     db = sqlite3.connect(OPENDCODE_DB)
-    event_map: dict[str, dict] = {}
-    parts = db.execute(
-        "SELECT data FROM part WHERE session_id = ? ORDER BY time_created",
-        (session_id,),
-    )
-    for row in parts:
-        try:
-            data = json.loads(row[0])
-            ptype = data.get("type", "")
-            if ptype == "tool-call":
-                call_id = data.get("callID", "")
-                if call_id:
-                    event_map[call_id] = data
-            elif ptype == "tool-result":
-                call_id = data.get("callID", "")
-                if call_id and call_id in event_map:
-                    call = event_map.pop(call_id)
-                    merged = {**call, **data,
-                              "type": "tool_result",
-                              "role": "tool",
-                              "tool_name": call.get("tool", ""),
-                              "command": call.get("input", {}).get("command", ""),
-                              "stdout": data.get("output", ""),
-                              "content": data.get("output", "")}
-                    merged.pop("callID", None)
-                    merged.pop("input", None)
-                    merged.pop("output", None)
-                    merged.pop("tool", None)
-                    event_map[call_id] = merged
-        except (json.JSONDecodeError, TypeError, KeyError):
-            continue
-
     count = 0
     with open(output_path, "w", encoding="utf-8") as fh:
-        for event in event_map.values():
-            fh.write(json.dumps(event) + "\n")
-            count += 1
+        parts = db.execute(
+            "SELECT data FROM part WHERE session_id = ? ORDER BY time_created",
+            (session_id,),
+        )
+        for row in parts:
+            try:
+                data = json.loads(row[0])
+                if data.get("type") != "tool":
+                    continue
+                state = data.get("state", {})
+                tool_name = data.get("tool", "")
+                event = {
+                    "type": "tool_result",
+                    "role": "tool",
+                    "tool_name": tool_name,
+                    "command": state.get("input", {}).get("command", "") or "",
+                    "stdout": state.get("output", "") or "",
+                    "content": state.get("output", "") or "",
+                    "exit_code": 0 if state.get("status") == "completed" else 1,
+                }
+                fh.write(json.dumps(event) + "\n")
+                count += 1
+            except (json.JSONDecodeError, TypeError, KeyError):
+                pass
     return count
 
 
