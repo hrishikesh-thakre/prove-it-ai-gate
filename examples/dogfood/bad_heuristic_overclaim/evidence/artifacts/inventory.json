@@ -1,0 +1,1 @@
+{"files": [{"path": "src/main.py", "size_bytes": 200}, {"path": "src/utils.py", "size_bytes": 450}], "total_files": 2, "selection_rule": "grep \"error\" across all .py files"}

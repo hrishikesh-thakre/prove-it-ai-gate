@@ -1,0 +1,4 @@
+{"command":"git status --short","purpose":"Check workspace before"}
+{"command":"find src/ -name \"*.py\" | wc -l","purpose":"Count source files"}
+{"command":"python -m pytest tests/ -q","purpose":"Run tests"}
+{"command":"git status --short","purpose":"Check workspace after"}

@@ -1,0 +1,6 @@
+diff --git a/src/main.py b/src/main.py
+--- a/src/main.py
++++ b/src/main.py
+@@ -10,7 +10,7 @@
+-    parse(data)
++    parse(data, strict=True)

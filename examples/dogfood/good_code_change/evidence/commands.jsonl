@@ -1,0 +1,4 @@
+{"command":"git status --short","purpose":"Check workspace before"}
+{"command":"python -m pytest tests/ -q","purpose":"Run tests after change"}
+{"command":"ruff check src/","purpose":"Run linter"}
+{"command":"git diff","purpose":"Generate diff"}

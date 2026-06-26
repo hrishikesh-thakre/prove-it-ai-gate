@@ -1,0 +1,1 @@
+{"error_patterns": [{"file": "src/main.py", "line": 15, "text": "raise ValueError(\"error\")"}, {"file": "src/utils.py", "line": 8, "text": "log.error(\"failed\")"}], "extraction_method": "grep_keyword_match"}

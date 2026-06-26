@@ -1,0 +1,9 @@
+{"timestamp":"2026-07-01T13:00:00Z","type":"tool_call","role":"assistant","tool_name":"shell","command":"git status --short"}
+{"timestamp":"2026-07-01T13:00:01Z","type":"tool_result","role":"tool","tool_name":"shell","command":"git status --short","stdout":"","exit_code":0}
+{"timestamp":"2026-07-01T13:01:00Z","type":"tool_call","role":"assistant","tool_name":"shell","command":"find src/ -name \"*.py\" | wc -l"}
+{"timestamp":"2026-07-01T13:01:01Z","type":"tool_result","role":"tool","tool_name":"shell","command":"find src/ -name \"*.py\" | wc -l","stdout":"16","exit_code":0}
+{"timestamp":"2026-07-01T13:02:00Z","type":"tool_call","role":"assistant","tool_name":"shell","command":"python -m pytest tests/ -q"}
+{"timestamp":"2026-07-01T13:02:05Z","type":"tool_result","role":"tool","tool_name":"shell","command":"python -m pytest tests/ -q","stdout":"80 passed in 10s","exit_code":0}
+{"timestamp":"2026-07-01T13:03:00Z","type":"tool_call","role":"assistant","tool_name":"shell","command":"git status --short"}
+{"timestamp":"2026-07-01T13:03:01Z","type":"tool_result","role":"tool","tool_name":"shell","command":"git status --short","stdout":"","exit_code":0}
+{"timestamp":"2026-07-01T13:04:00Z","type":"message","role":"assistant","content":"Read-only audit complete. 16 source files, 80 tests all passing. No files modified. Confidence: 0.85. Scope: Complete for src/ and tests/ directories."}

@@ -1,0 +1,2 @@
+{"command":"grep -r \"TODO\" --include=\"*.py\" .","purpose":"Find TODO markers"}
+{"command":"git status --short","purpose":"Check workspace"}

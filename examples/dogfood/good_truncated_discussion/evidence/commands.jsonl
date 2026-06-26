@@ -1,0 +1,2 @@
+{"command":"grep -r \"pattern\" src/ > full_results.txt && wc -l full_results.txt","purpose":"Full grep with saved output"}
+{"command":"git status --short","purpose":"Check workspace"}

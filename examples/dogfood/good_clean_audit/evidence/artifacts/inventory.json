@@ -1,0 +1,1 @@
+{"files": [{"path": "src/cli.py", "size_bytes": 14000}, {"path": "src/gate_engine.py", "size_bytes": 9000}], "total_files": 16, "selection_rule": "All .py files under src/"}

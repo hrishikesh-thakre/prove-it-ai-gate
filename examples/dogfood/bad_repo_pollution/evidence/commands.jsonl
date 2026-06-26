@@ -1,0 +1,3 @@
+{"command":"git status --short","purpose":"Check workspace before audit"}
+{"command":"python inventory.py","purpose":"Inventory Python files"}
+{"command":"git status --short","purpose":"Check workspace after audit"}

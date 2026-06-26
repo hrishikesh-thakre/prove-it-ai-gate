@@ -1,0 +1,2 @@
+{"command":"grep -r \"error\" --include=\"*.py\" src/","purpose":"Find error patterns"}
+{"command":"git status --short","purpose":"Check workspace"}

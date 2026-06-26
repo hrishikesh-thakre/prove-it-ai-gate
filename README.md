@@ -2,16 +2,38 @@
 
 **Don't trust agent output. Accept evidence.**
 
+[![CI](https://github.com/hrishikesh-thakre/prove-it-ai-gate/actions/workflows/tests.yml/badge.svg)](https://github.com/hrishikesh-thakre/prove-it-ai-gate/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-80%20passed-brightgreen)](tests/)
 
 A lightweight local CLI acceptance gate for AI-generated engineering work. Checks agent transcripts, evidence folders, workspace state, and validation outputs before accepting AI-generated work.
 
+> **Warning:** This tool checks evidence quality, not absolute correctness. It is not a substitute for human review on high-risk changes.
+
+## Project Status
+
+`prove-it-ai-gate` is currently an **early beta**.
+
+**Stable core:**
+- `transcript-check`
+- `workspace-check`
+- `evidence-check`
+- `accept`
+
+**Experimental:**
+- `reuse-scan`
+- `capture`
+- `wiki upload`
+- `evidence cleanup/archive`
+
+Use the stable core for local dogfooding. Treat experimental features as evolving APIs.
+
 ## Installation
 
+From GitHub:
+
 ```bash
-pip install prove-it-ai-gate
+pip install git+https://github.com/hrishikesh-thakre/prove-it-ai-gate.git
 ```
 
 Or from source:
@@ -39,10 +61,10 @@ ai-gate accept \
   --transcript transcript.jsonl \
   --task-type audit
 
-# Scan a knowledge wiki before starting work
+# Scan a knowledge wiki before starting work (experimental)
 ai-gate reuse-scan --brief brief.md --local-wiki ./wiki-exports
 
-# Capture reusable learnings after acceptance
+# Capture reusable learnings after acceptance (experimental)
 ai-gate capture --evidence ./evidence --output ./learnings
 ```
 
@@ -70,6 +92,16 @@ ai-gate capture --evidence ./evidence --output ./learnings
 | `evidence_validation_integrity` | Test/lint output mismatch with closeout claims |
 | `evidence_depth` | Shallow/minimal evidence stubs |
 | `git_status_authenticity` | Fabricated git status not matching transcript |
+
+## Dogfood
+
+Run automated dogfood cases to verify the gate catches known failure patterns:
+
+```bash
+python scripts/run_dogfood.py
+```
+
+See `dogfood/dogfood_report.md` for results and `examples/dogfood/` for test case fixtures.
 
 ## Policy Packs
 
@@ -105,6 +137,7 @@ See `docs/evidence-folder-contract.md` for requirements by task type.
 - [Workspace Hygiene](docs/workspace-hygiene.md)
 - [Confidence Rules](docs/confidence-rules.md)
 - [Prove It Without Me](docs/prove-it-without-me.md)
+- [Release Readiness](docs/release-readiness.md)
 
 ## License
 
