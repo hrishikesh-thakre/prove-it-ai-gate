@@ -16,6 +16,7 @@ from .heuristic_checker import check_heuristic_extraction
 from .acceptance_report import write_report, write_csv_report
 from .knowledge_capture import write_capture, capture_from_json_report, upload_to_wiki
 from .evidence_retention import cleanup_evidence, archive_evidence, summary_report
+from .desktop_watcher import start_watcher
 
 
 DEFAULT_POLICY_DIR = os.path.join(os.path.dirname(__file__), "policies")
@@ -343,6 +344,17 @@ def cmd_reuse_scan_local(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_opencode_watch(args: argparse.Namespace) -> int:
+    """Live watcher: poll OpenCode SQLite DB, detect violations, alert."""
+    start_watcher(
+        project_dir=args.project_dir or ".",
+        task_type=args.task_type or "audit",
+        poll_interval=args.interval,
+        auto_terminate=args.auto_terminate,
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="ai-gate",
@@ -412,6 +424,12 @@ def main() -> int:
     p_reuse.add_argument("--max-results", type=int, default=30, help="Max results to return")
     p_reuse.add_argument("--output", help="Output directory for reuse scan report")
 
+    p_watch = subparsers.add_parser("opencode-watch", help="Live desktop watcher — monitor OpenCode SQLite DB for violations")
+    p_watch.add_argument("--project-dir", default=".", help="Path to target project directory")
+    p_watch.add_argument("--task-type", default="audit", help="Task type for policy resolution")
+    p_watch.add_argument("--interval", type=float, default=2.0, help="Poll interval in seconds")
+    p_watch.add_argument("--auto-terminate", action="store_true", help="Auto-terminate OpenCode on high-severity violations")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -436,6 +454,8 @@ def main() -> int:
         if getattr(args, "local_wiki", None):
             return cmd_reuse_scan_local(args)
         return cmd_reuse_scan(args)
+    elif args.command == "opencode-watch":
+        return cmd_opencode_watch(args)
     else:
         parser.print_help()
         return 0
