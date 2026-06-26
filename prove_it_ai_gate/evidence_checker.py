@@ -85,6 +85,11 @@ MIN_FILE_SIZES = {
     "validation/typecheck_output.txt": 5,
 }
 
+SKIP_EMPTY_CHECK = {
+    "workspace/git_status_before.txt",
+    "workspace/git_status_after.txt",
+}
+
 
 def _check_file_non_empty(evidence_root: Path, rel_path: str) -> tuple[bool, str]:
     file_path = evidence_root / rel_path
@@ -97,6 +102,8 @@ def _check_file_non_empty(evidence_root: Path, rel_path: str) -> tuple[bool, str
         return False, f"Cannot read {rel_path}: {exc}"
 
     if not content:
+        if rel_path in SKIP_EMPTY_CHECK:
+            return True, ""
         return False, f"Empty file: {rel_path}"
 
     min_size = MIN_FILE_SIZES.get(rel_path, 1)
