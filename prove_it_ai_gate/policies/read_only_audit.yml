@@ -15,6 +15,7 @@ required_checks:
   - deterministic_evidence_artifact
   - workspace_hygiene_check
   - no_repo_modification_unless_requested
+  - policy_violation_check
   - confidence_claim_check
   - scope_completeness_check
   - closeout_transcript_crosscheck

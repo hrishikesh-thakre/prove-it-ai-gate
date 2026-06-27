@@ -1,7 +1,7 @@
-// Smoke test for prove-it-ai-gate plugin logic
+// Smoke test for prove-it-ai-gate daemon logic
 // ================================================
-// Tests core logic (secret detection, bash risk, YAML parsing,
-// mode detection) without requiring OpenCode or Bun.
+// Tests core logic (daemon files, secret detection, bash risk,
+// YAML parsing, mode detection) without requiring OpenCode or Bun.
 //
 // Usage: node scripts/smoke-test.mjs
 
@@ -25,26 +25,29 @@ function section(title) {
   console.log(`${"=".repeat(55)}`);
 }
 
-// ── 1. Plugin file check ─────────────────────────────────────────
-section("1. Plugin file integrity");
+// ── 1. Daemon file check ─────────────────────────────────────────
+section("1. Daemon file integrity");
 
-const pluginPath = join(projectRoot, ".opencode", "plugins", "prove-it-ai-gate.js");
-check("Plugin file exists", existsSync(pluginPath));
+const daemonPath = join(projectRoot, "prove_it_ai_gate", "daemon.py");
+const builderPath = join(projectRoot, "prove_it_ai_gate", "evidence_builder.py");
+const hooksPath = join(projectRoot, "prove_it_ai_gate", "codex_hooks.py");
+check("Daemon module exists", existsSync(daemonPath));
+check("Evidence builder module exists", existsSync(builderPath));
+check("Codex hook module exists", existsSync(hooksPath));
 
-const source = readFileSync(pluginPath, "utf-8");
-check("Plugin is non-empty", source.length > 100);
-
-// Verify key exports and hooks are present
-check("Exports ProveItAIGate", source.includes("export const ProveItAIGate"));
-check("Has tool.execute.before", source.includes('"tool.execute.before"'));
-check("Has tool.execute.after", source.includes('"tool.execute.after"'));
-check("Has file.edited", source.includes('"file.edited"'));
-check("Has session.idle", source.includes('"session.idle"'));
-check("Has session.error", source.includes('"session.error"'));
-check("Has secret detection", source.includes("SECRET_NAMES"));
-check("Has risky bash detection", source.includes("BLOCKER_RES") || source.includes("RISKY"));
-check("Has evidence recording", source.includes("transcript.jsonl"));
-check("Has gate engine call", source.includes("prove_it_ai_gate.cli"));
+const daemonSource = readFileSync(daemonPath, "utf-8");
+const builderSource = readFileSync(builderPath, "utf-8");
+const hooksSource = readFileSync(hooksPath, "utf-8");
+check("Daemon has SupervisorDaemon", daemonSource.includes("class SupervisorDaemon"));
+check("Daemon checks OpenCode compatibility", daemonSource.includes("check_opencode_compatibility"));
+check("Daemon has OpenCode adapter", daemonSource.includes("process_opencode"));
+check("Daemon has Codex spool adapter", daemonSource.includes("process_codex_spool"));
+check("Daemon status includes late_snapshot", daemonSource.includes("late_snapshot"));
+check("Daemon status includes OpenCode DB status", daemonSource.includes("opencode_db_status"));
+check("Builder writes run-scoped evidence", builderSource.includes("latest.json") && builderSource.includes("metadata.json"));
+check("Builder records late_snapshot", builderSource.includes("late_snapshot"));
+check("Codex hooks use hook_event_name", hooksSource.includes("hook_event_name"));
+check("Codex hooks write daemon spool", hooksSource.includes("codex_events.jsonl"));
 
 // ── 2. Config check ──────────────────────────────────────────────
 section("2. Configuration");
@@ -224,27 +227,28 @@ console.log(`  Gate exit code: ${gateRun.status}`);
 if (gateRun.stdout) console.log(gateRun.stdout.split("\n").slice(0, 6).map(l => `  ${l}`).join("\n"));
 if (gateRun.stderr) console.log(`  stderr: ${gateRun.stderr.slice(0, 200)}`);
 
-// ── 7. Install-ready check ──────────────────────────────────────
-section("7. Install readiness");
+// ── 7. Supervisor-ready check ───────────────────────────────────
+section("7. Supervisor readiness");
 
-const pluginReady = existsSync(pluginPath) && source.length > 100;
-check("Plugin ready for OpenCode", pluginReady);
+const daemonReady = existsSync(daemonPath) && daemonSource.includes("start_background");
+check("Daemon ready for background startup", daemonReady);
 
-const installScript = join(projectRoot, "scripts", "install-plugin.ps1");
-check("Install script exists", existsSync(installScript));
+const cliPath = join(projectRoot, "prove_it_ai_gate", "cli.py");
+const cliSource = readFileSync(cliPath, "utf-8");
+check("CLI exposes daemon command", cliSource.includes('subparsers.add_parser("daemon"'));
+check("CLI exposes setup codex", cliSource.includes('p_setup_subs.add_parser("codex"'));
 
 // ── Summary ─────────────────────────────────────────────────────
 console.log(`\n${"=".repeat(55)}`);
 console.log(`  RESULTS: ${passed} passed, ${failed} failed`);
 console.log(`${"=".repeat(55)}`);
 
-if (pluginReady && failed === 0) {
-  console.log("\nThe plugin is ready. To use it in OpenCode:");
-  console.log("  1. Install OpenCode:  npm install -g opencode   (or use bun)");
-  console.log('  2. cd to this project: cd prove-it-ai-gate');
-  console.log("  3. Start:  opencode");
-  console.log('  4. Ask: "List all Python files in this project"');
-  console.log("  5. Check .ai-gate/evidence/ after the session");
+if (daemonReady && failed === 0) {
+  console.log("\nThe supervisor is ready. To use it:");
+  console.log("  1. ai-gate setup daemon --project-dir . --task-type audit");
+  console.log("  2. ai-gate daemon start");
+  console.log("  3. ai-gate daemon status");
+  console.log("  4. For Codex: ai-gate setup codex --project-dir . --task-type audit");
 } else {
   console.log("\nSome checks failed — review the output above.");
 }

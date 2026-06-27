@@ -85,6 +85,15 @@ MIN_FILE_SIZES = {
     "validation/typecheck_output.txt": 5,
 }
 
+VALIDATION_BLOCKER_MARKERS = [
+    "AI_GATE_VALIDATION_MISSING",
+    "AI_GATE_VALIDATION_TIMEOUT",
+]
+
+VALIDATION_REJECT_MARKERS = [
+    "AI_GATE_VALIDATION_FAILED",
+]
+
 SKIP_EMPTY_CHECK = {
     "workspace/git_status_before.txt",
     "workspace/git_status_after.txt",
@@ -151,6 +160,24 @@ def check_evidence_folder(evidence_path: str, task_type: str) -> CheckResult:
         ok, msg = _check_file_non_empty(evidence_root, rel_path)
         if not ok:
             issues.append(Issue("evidence_folder_schema_check", Severity.BLOCKER, msg))
+        elif rel_path.startswith("validation/"):
+            content = (evidence_root / rel_path).read_text(encoding="utf-8", errors="replace")
+            for marker in VALIDATION_BLOCKER_MARKERS:
+                if marker in content:
+                    issues.append(Issue(
+                        "evidence_folder_schema_check",
+                        Severity.BLOCKER,
+                        f"{rel_path} records a blocking validation condition: {marker}",
+                    ))
+                    break
+            for marker in VALIDATION_REJECT_MARKERS:
+                if marker in content:
+                    issues.append(Issue(
+                        "evidence_folder_schema_check",
+                        Severity.REJECT,
+                        f"{rel_path} records failed validation: {marker}",
+                    ))
+                    break
 
     for root, _dirs, files in os.walk(evidence_root):
         for fname in files:
@@ -163,7 +190,11 @@ def check_evidence_folder(evidence_path: str, task_type: str) -> CheckResult:
                     f"Evidence file may contain truncated content: {rel}",
                 ))
 
-    status = "passed" if not any(i.severity == Severity.BLOCKER for i in issues) else "blocked"
+    status = "passed"
+    if any(i.severity == Severity.BLOCKER for i in issues):
+        status = "blocked"
+    elif any(i.severity == Severity.REJECT for i in issues):
+        status = "failed"
     return CheckResult(
         check_name="evidence_folder_schema_check",
         status=status,

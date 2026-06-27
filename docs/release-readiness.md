@@ -1,6 +1,7 @@
 # Release Readiness
 
-`prove-it-ai-gate` v0.3.1 — early beta assessment.
+`prove-it-ai-gate` package v0.3.2 with experimental supervisor work through the
+v0.6 hardening line.
 
 ## Supported Commands
 
@@ -18,6 +19,14 @@
 
 | Command | Status | Notes |
 |---|---|---|
+| `ai-gate daemon register/list/start/stop/status` | Experimental | Local supervisor for registered projects |
+| `ai-gate daemon logs` | Experimental | Redacted operational daemon logs |
+| `ai-gate daemon install-startup/uninstall-startup/startup-status` | Experimental | Windows login startup only |
+| `ai-gate setup daemon` | Experimental | Guided daemon registration and optional startup install |
+| `ai-gate setup codex` | Experimental | Project-local Codex hook install; requires `/hooks` trust |
+| `ai-gate codex-transcript` | Experimental | Fallback/reconciliation only, marks `FALLBACK_ONLY` |
+| `ai-gate reports list/show/open` | Experimental | Static report browsing; no local web server |
+| `ai-gate opencode-watch` | Experimental | Manual/debug OpenCode Desktop watcher |
 | `ai-gate reuse-scan` | Experimental | Local-wiki mode stable; live API mode needs rate-limiting tuning |
 | `ai-gate capture` | Experimental | Output format stable; wiki upload path tested but limited |
 | `ai-gate cleanup` | Experimental | Dry-run safe; `--apply` requires confirmation |
@@ -30,13 +39,25 @@
 
 2. **Git status dependency**: Workspace hygiene checks require `git_status_before.txt` and `git_status_after.txt` in the evidence folder. If missing, the gate falls back to live `git status` on the target repo, which may lack historical context. The gate emits a warning when this occurs.
 
-3. **Transcript format**: The JSONL parser supports common formats but has not been tested against MCP-formatted transcripts, OpenCode transcripts, or other platform-specific formats. Each platform may require minor parser adjustments.
+3. **Transcript format**: The JSONL parser supports common formats, but Codex
+   supervision must use official hooks as the primary source. Transcript
+   reconstruction is fallback/reconciliation only and is marked
+   `FALLBACK_ONLY`.
 
-4. **Single-platform testing**: All development and dogfood testing has been on a single platform (Windows/Python 3.11). Cross-platform behavior (Linux, macOS, Python 3.9-3.12) is verified by CI but limited to the test suite.
+4. **Single-platform startup integration**: Windows Startup-folder integration
+   is implemented. macOS/Linux service-manager integration is not implemented.
 
-5. **Reuse Scout scoring**: TF-IDF scoring with Jaccard overlap works for keyword-rich briefs but may produce low relevance scores (0.20-0.40) for abstract or domain-specific briefs. Semantic/embedding-based search is not implemented.
+5. **Daemon dogfood still required**: OpenCode and Codex supervision are covered
+   by fixtures and smoke checks, but real Desktop dogfood remains required
+   before treating the daemon as more than experimental.
 
-6. **No incremental acceptance**: The gate runs all checks every time. There is no caching, partial re-run, or incremental check mode.
+6. **Reuse Scout scoring**: TF-IDF scoring with Jaccard overlap works for keyword-rich briefs but may produce low relevance scores (0.20-0.40) for abstract or domain-specific briefs. Semantic/embedding-based search is not implemented.
+
+7. **No incremental acceptance**: The gate runs all checks every time. There is no caching, partial re-run, or incremental check mode.
+
+8. **Operational logs are not evidence logs**: Daemon logs intentionally redact
+   raw stdout/stderr and transcript bodies. The evidence folder remains the
+   authoritative evidence record.
 
 ## False Accept / False Reject Definitions
 
@@ -71,6 +92,39 @@ These rates are measured on a curated 6-case dogfood suite. Real-world rates may
 - Policy YAML files with no internal project mappings
 - Documentation describing the tool, not internal usage
 
+## Supervisor Readiness
+
+Implemented experimental supervisor capabilities:
+
+- registered project supervision
+- run-scoped evidence folders
+- OpenCode SQLite supervision
+- Codex hook-first supervision
+- fallback transcript marking
+- daemon lock/heartbeat/stale PID recovery
+- safer line-level Codex spool checkpointing
+- redacted daemon logs
+- Windows startup install/status/uninstall
+- static report listing/show/open
+- normalized project state and coverage fields
+
+Status states:
+
+- `UNSUPERVISED`
+- `FALLBACK_ONLY`
+- `RUNNING`
+- `BLOCKED`
+- `REJECT`
+- `ACCEPT_WITH_CONDITIONS`
+- `ACCEPT`
+
+Coverage states:
+
+- `UNSUPERVISED`
+- `HOOKS_CONFIGURED_UNTRUSTED_UNVERIFIED`
+- `HOOKS_OBSERVED`
+- `FALLBACK_ONLY`
+
 ## What NOT to Use This Tool For (Yet)
 
 - Production gatekeeping without human review
@@ -78,15 +132,18 @@ These rates are measured on a curated 6-case dogfood suite. Real-world rates may
 - Regulatory compliance (no formal certification)
 - Replacing code review on high-risk changes (auth, crypto, data migration)
 - Gating PRs automatically in CI (GitHub Actions integration not yet built)
-- Multi-user or team workflows (single-user CLI only)
+- Multi-user or team workflows (single-user local daemon only)
+- Unattended production enforcement without reviewing acceptance reports
 
 ## Test Coverage
 
-- 80 tests across 10 test modules
+- 246 tests across the test suite as of the v0.6 hardening pass
 - 8 false-accept tests (known bad patterns)
 - 5 false-reject tests (known good patterns)
 - 11 adversarial attack tests (evidence fabrication, inflation, laundering)
 - 6 automated dogfood cases (3 bad, 3 good)
+- Focused daemon/Codex suite: 145 tests
+- Smoke test: `node scripts/smoke-test.mjs` reports 52 checks
 
 ## Package Structure
 
@@ -114,8 +171,8 @@ pip install --index-url https://test.pypi.org/simple/ prove-it-ai-gate
 Tag a release commit:
 
 ```bash
-git tag v0.3.1
-git push origin v0.3.1
+git tag v0.3.2
+git push origin v0.3.2
 ```
 
 The GitHub Actions `release.yml` workflow builds, checks, and publishes to PyPI via Trusted Publishing on every `v*` tag push.

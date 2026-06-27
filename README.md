@@ -22,6 +22,7 @@ A lightweight local CLI acceptance gate for AI-generated engineering work. Check
 - `accept`
 
 **Experimental:**
+- `daemon` (automated evidence supervisor)
 - `opencode-watch` (Windows Desktop live watcher)
 - `reuse-scan`
 - `capture`
@@ -61,6 +62,14 @@ ai-gate accept \
   --transcript transcript.jsonl \
   --task-type audit
 
+# Preferred automated evidence path
+ai-gate setup daemon --project-dir . --task-type audit
+ai-gate daemon start
+ai-gate daemon status
+ai-gate daemon logs --tail 50
+ai-gate reports list --project-dir .
+ai-gate reports show latest --project-dir .
+
 # Scan a knowledge wiki before starting work (experimental)
 ai-gate reuse-scan --brief brief.md --local-wiki ./wiki-exports
 
@@ -68,11 +77,121 @@ ai-gate reuse-scan --brief brief.md --local-wiki ./wiki-exports
 ai-gate capture --evidence ./evidence --output ./learnings
 ```
 
+## Automated Evidence Supervisor Daemon (Experimental)
+
+The daemon is the preferred path for automated before/after evidence capture.
+It watches registered projects only, creates run-scoped evidence folders, runs
+conservative validation, runs final acceptance, and records the latest decision.
+
+```bash
+ai-gate daemon register --project-dir . --task-type audit
+ai-gate daemon start
+ai-gate daemon status
+ai-gate daemon status --json
+ai-gate daemon logs --tail 50
+ai-gate daemon stop
+```
+
+Evidence is written under:
+
+```
+evidence/runs/<timestamp>-<agent>-<session-id>/
+evidence/latest.json
+```
+
+Daemon state, logs, locks, and hook spools are stored in the user config
+directory, not in the project repo. Each status row separates project state
+from coverage:
+
+- project state: `UNSUPERVISED`, `FALLBACK_ONLY`, `RUNNING`, `BLOCKED`,
+  `REJECT`, `ACCEPT_WITH_CONDITIONS`, or `ACCEPT`
+- coverage: `HOOKS_CONFIGURED_UNTRUSTED_UNVERIFIED`, `HOOKS_OBSERVED`,
+  `FALLBACK_ONLY`, or `UNSUPERVISED`
+
+Status also reports the latest run path, agent/session, decision, next action,
+late snapshot flag, finalization reason, and daemon log path.
+
+For Windows login startup:
+
+```bash
+ai-gate daemon startup-status
+ai-gate daemon install-startup --dry-run
+ai-gate daemon install-startup
+ai-gate daemon install-startup --force
+ai-gate daemon uninstall-startup
+```
+
+Startup install is idempotent and writes startup failures to the daemon log.
+
+To browse reports without starting a local web server:
+
+```bash
+ai-gate reports list --project-dir .
+ai-gate reports show latest --project-dir . --markdown
+ai-gate reports show latest --project-dir . --json
+ai-gate reports open latest --project-dir .
+```
+
+Finalized runs also regenerate a static index under `evidence/reports/`.
+
+### OpenCode Supervision
+
+The daemon reuses the OpenCode Desktop SQLite watcher logic. It captures a true
+`git_status_before.txt` for newly detected sessions, marks
+`late_snapshot=true` when a session was already active, dedupes events by
+session and SQLite `rowid`, and finalizes on idle timeout, daemon stop, or
+restart recovery.
+
+`daemon status` also reports OpenCode database health:
+
+- database path
+- schema compatibility
+- latest tool sample shape
+- current idle duration
+- late snapshot flag
+- finalization reason
+- required next action
+
+Recommended v0.4 dogfood flow:
+
+```bash
+ai-gate daemon register --project-dir . --task-type audit
+ai-gate daemon start --foreground --idle-seconds 30
+# Run a real OpenCode Desktop session in the registered project.
+ai-gate daemon status
+```
+
+For code-change dogfood, use `--task-type code_change`. If no conservative
+test/lint/typecheck command is detected, the final decision should be `BLOCKED`
+rather than a fabricated pass.
+
+### Codex Supervision
+
+Codex support is hook-first. Install hooks with:
+
+```bash
+ai-gate setup codex --project-dir . --task-type audit
+```
+
+This writes `.codex/hooks.json` for `SessionStart`, `PreToolUse`,
+`PostToolUse`, and `Stop`. Hooks write canonical JSONL events to the daemon
+spool. Codex session transcript parsing remains fallback/reconciliation only
+and is not treated as primary supervision.
+
+Codex requires non-managed hooks to be reviewed and trusted before they run.
+After installation, restart Codex or start a new session, open `/hooks`, review
+the project-local hook, and trust it once. Until a hook event is observed,
+daemon status reports Codex coverage as
+`HOOKS_CONFIGURED_UNTRUSTED_UNVERIFIED`, not full evidence coverage. Transcript
+reconstruction through `ai-gate codex-transcript` is labelled `FALLBACK_ONLY`.
+
 ## OpenCode Desktop Watcher (Experimental)
 
-Live background guard for OpenCode Desktop on Windows. Polls the OpenCode SQLite
+Manual/debug guard for OpenCode Desktop on Windows. Polls the OpenCode SQLite
 database for new tool events, detects high-signal violations in near-real-time,
 raises Windows toast alerts, and runs final acceptance at session end.
+
+For routine automated evidence collection, prefer `ai-gate daemon`.
 
 ```bash
 # Start watching an OpenCode session
@@ -160,6 +279,7 @@ See `docs/evidence-folder-contract.md` for requirements by task type.
 
 ## Docs
 
+- [Automated Evidence Supervisor](docs/automated-evidence-supervisor.md)
 - [Evidence Folder Contract](docs/evidence-folder-contract.md)
 - [Acceptance Policy Model](docs/acceptance-policy-model.md)
 - [Transcript Schema](docs/transcript-schema.md)

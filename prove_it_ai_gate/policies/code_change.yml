@@ -14,6 +14,7 @@ required_checks:
   - evidence_folder_schema_check
   - workspace_hygiene_check
   - changed_files_summary_check
+  - policy_violation_check
   - confidence_claim_check
   - scope_completeness_check
   - closeout_transcript_crosscheck

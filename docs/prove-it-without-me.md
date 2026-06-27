@@ -35,6 +35,29 @@ Acceptance depends on:
 - Explicit unresolved risks
 - Human approval for high-risk work
 
+## Automated Evidence
+
+The preferred implementation path is a supervisor daemon that owns the capture
+boundary:
+
+- register the project once
+- capture workspace state before a supported session when possible
+- capture tool events through supported adapters
+- capture final workspace state and diff summary
+- run conservative validation
+- write an acceptance report
+
+This removes the adoption blocker of asking the user to remember manual
+before/after commands for every session.
+
+Automated evidence is still truthful evidence, not forced acceptance:
+
+- late capture is marked with `late_snapshot=true`
+- transcript reconstruction is marked `FALLBACK_ONLY`
+- missing validation blocks code-change acceptance
+- failed validation rejects code-change acceptance
+- untrusted/unobserved Codex hooks are reported as unverified coverage
+
 ## What This Is Not
 
 This is not proof that the work is absolutely correct. The tool checks evidence quality, not absolute truth.

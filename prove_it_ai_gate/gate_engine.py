@@ -69,6 +69,7 @@ def evaluate_checks(
     from .scope_completeness_checker import check_scope_completeness
     from .heuristic_checker import check_heuristic_extraction
     from .transcript_crosscheck import check_closeout_vs_transcript
+    from .policy_violations import check_transcript_policy_violations
     from .evidence_integrity import (
         check_inventory_vs_transcript,
         check_closeout_vs_validation,
@@ -93,6 +94,7 @@ def evaluate_checks(
         "scope_completeness_check": lambda: check_scope_completeness(evidence_path),
         "heuristic_extraction_check": lambda: check_heuristic_extraction(evidence_path, transcript_path),
         "changed_files_summary_check": lambda: _check_changed_files_summary(evidence_path),
+        "policy_violation_check": lambda: check_transcript_policy_violations(transcript_path),
         "closeout_transcript_crosscheck": lambda: check_closeout_vs_transcript(evidence_path, transcript_path),
         "evidence_inventory_integrity": lambda: check_inventory_vs_transcript(evidence_path, transcript_path),
         "evidence_validation_integrity": lambda: check_closeout_vs_validation(evidence_path, transcript_path),
